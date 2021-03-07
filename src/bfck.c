@@ -4,7 +4,7 @@
 #include "bfck.h"
 
 _Noreturn static void usage() {
-  printf("Usage: bfck [options] file\n\n");
+  printf("Usage: bfck [options] [file | -c cmd]\n\n");
   printf(" Just another brainf*ck interpreter\n");
   exit(0);
 }
