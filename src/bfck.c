@@ -5,7 +5,7 @@
 
 _Noreturn static void usage() {
   printf("Usage: bfck [options] file\n\n");
-  printf(" Just another brainf*ck interpretator\n");
+  printf(" Just another brainf*ck interpreter\n");
   exit(0);
 }
 
@@ -45,6 +45,8 @@ int bfck_init(struct bfck_inter *inter) {
   if (!(inter->tokenizer = malloc(sizeof(*inter->tokenizer)))) {
     return 1;
   }
+  inter->tokenizer->buf = 0;
+  inter->tokenizer->ip = 0;
   return 0;
 }
 
@@ -158,13 +160,34 @@ static void shift_arg(int *argc, char **argv) {
 static void parse_arg(int *argc, char **argv, struct bfck_inter *inter) {
   if (!strcmp(*argv, "--help")) {
     usage();
-  } else {
-    char *buf;
-    if ((buf = read_file(*argv))) {
-      bfck_set_buffer(inter->tokenizer, read_file(*argv));
+  } else if (!strcmp(*argv, "-c")) {
+    if (*argc < 2) {
+      fprintf(stderr, "Error: -c option requires an argument\n");
+      usage();
+      exit(1);
+    }
+    // If buffer already filled, just skip -c argument
+    if (inter->tokenizer->buf) {
+      shift_arg(argc, argv);
       shift_arg(argc, argv);
     } else {
-      exit(1);
+      shift_arg(argc, argv);
+      bfck_set_buffer(inter->tokenizer, strdup(*argv));
+      shift_arg(argc, argv);
+    }
+  } else {
+    // If buffer already filled with -c option, use that,
+    // instead of refilling from file
+    if (inter->tokenizer->buf) {
+      shift_arg(argc, argv);
+    } else {
+      char *buf;
+      if ((buf = read_file(*argv))) {
+        bfck_set_buffer(inter->tokenizer, read_file(*argv));
+        shift_arg(argc, argv);
+      } else {
+        exit(1);
+      }
     }
   }
 }

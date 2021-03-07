@@ -7,9 +7,6 @@ BIN = bfck
 
 all: $(BIN)
 
-%.d: %.c
-	$(CC) -MM $< $(CFLAGS) $(INCLUDE) > $@
-
 -include $(OBJS:.o=.d)
 
 %.o: %.c
